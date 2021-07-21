@@ -77,11 +77,15 @@ fn main() {
     let db = Arc::new(Mutex::new(sled::open(db_path).unwrap()));
     let db_listen = db.clone();
 
-    let patterns_reader = fs::File::open(patterns_path)
+    let patterns_reader = fs::File::open(patterns_path.clone())
         .and_then(|f|Ok(BufReader::new(f)))
         .unwrap();
-
-    let raw_event_patterns: Vec<RawEventPattern> = serde_json::from_reader(patterns_reader).unwrap();
+    
+    let raw_event_patterns: Vec<RawEventPattern> = match patterns_path {
+        json if json.ends_with(".json") => serde_json::from_reader(patterns_reader).unwrap(),
+        yaml if yaml.ends_with(".yaml") => serde_yaml::from_reader(patterns_reader).unwrap(),
+        _ => panic!("Patterns file must be a .json or .yaml file!")
+    };
     let event_patterns: Vec<EventPattern> = raw_event_patterns.into_iter().map(|rep| EventPattern::try_from(rep).unwrap()).collect();
     let mut event_patterns_copy = event_patterns.to_vec();
     event_patterns_copy.sort_unstable_by_key(|ep| (ep.event).clone());
@@ -166,6 +170,7 @@ fn main() {
         });
         server.listen("localhost:6767").unwrap();
     });
+    
     //Stop when the listen_thread receives EOF.
     listen_thread
         .join()
