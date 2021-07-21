@@ -1,0 +1,24 @@
+[
+    {
+        "event": "observations",
+        "pattern": ".* - observed .*",
+        "attribute_patterns": {
+            "subject": ".* observed (\\w+).*"
+        }
+    },
+    {
+        "event": "segfaults",
+        "pattern": ".* - (.*segmentation fault.*)",
+        "attribute_patterns": {}
+    },
+    {
+        "event": "panic",
+        "pattern": ".* - .*[pP]anic.*",
+        "attribute_patterns": {}
+    },
+    {
+        "event": "exception",
+        "pattern": ".* [eE]xception .*",
+        "attribute_patterns":{}
+    }
+]
